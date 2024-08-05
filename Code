@@ -1,0 +1,67 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+# Constants
+WIKIPEDIA_URL = "https://en.wikipedia.org"
+USERNAME = "your_username"
+PASSWORD = "your_password"
+
+# Initialize the WebDriver
+driver = webdriver.Chrome()  # or any other browser driver you are using
+wait = WebDriverWait(driver, 10)
+
+def login():
+    driver.get(f"{WIKIPEDIA_URL}/w/index.php?title=Special:UserLogin")
+    wait.until(EC.presence_of_element_located((By.ID, "wpName1"))).send_keys(USERNAME)
+    driver.find_element(By.ID, "wpPassword1").send_keys(PASSWORD)
+    driver.find_element(By.ID, "wpRemember").click()  # Remember me option
+    driver.find_element(By.ID, "wpLoginAttempt").click()
+
+def search(topic):
+    search_box = wait.until(EC.presence_of_element_located((By.NAME, "search")))
+    search_box.send_keys(topic)
+    search_box.send_keys(Keys.RETURN)
+
+def change_appearance():
+    # Navigating to preferences (User Preferences)
+    driver.get(f"{WIKIPEDIA_URL}/w/index.php?title=Special:Preferences")
+    skin_link = wait.until(EC.presence_of_element_located((By.LINK_TEXT, "Appearance")))
+    skin_link.click()
+
+    # Selecting a different skin (example: Vector)
+    vector_skin = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[value='vector']")))
+    vector_skin.click()
+    
+    # Save the changes
+    save_button = wait.until(EC.presence_of_element_located((By.ID, "prefcontrol")))
+    save_button.click()
+
+def navigate_and_scroll():
+    # Navigate to the main page
+    driver.get(f"{WIKIPEDIA_URL}/wiki/Main_Page")
+
+    # Scroll to the bottom of the page
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+def click_link():
+    # Click on a random link on the Main Page
+    link = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#mp-upper .mp-h2 a")))
+    link.click()
+
+def logout():
+    driver.get(f"{WIKIPEDIA_URL}/w/index.php?title=Special:UserLogout")
+    confirm_logout = wait.until(EC.presence_of_element_located((By.LINK_TEXT, "log out")))
+    confirm_logout.click()
+
+try:
+    login()
+    search("Selenium (software)")
+    change_appearance()
+    navigate_and_scroll()
+    click_link()
+finally:
+    logout()
+    driver.quit()
